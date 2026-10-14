@@ -595,6 +595,18 @@ struct TransactionResultMetaV1
     LedgerEntryChanges postTxApplyFeeProcessing;
 };
 
+struct TransactionResultMetaV2
+{
+    ExtensionPoint ext;
+
+    TransactionEnvelope tx;
+    TransactionResult result;
+    int64* baseFee;
+    LedgerEntryChanges feeProcessing;
+    TransactionMeta txApplyProcessing;
+    LedgerEntryChanges postTxApplyFeeProcessing;
+};
+
 // this represents a single upgrade that was performed as part of a ledger
 // upgrade
 struct UpgradeEntryMeta
@@ -692,6 +704,31 @@ struct LedgerCloseMetaV2
     LedgerKey evictedKeys<>;
 };
 
+struct LedgerCloseMetaV3
+{
+    ExtensionPoint ext;
+
+    LedgerHeaderHistoryEntry ledgerHeader;
+
+    // Transactions are sorted in apply order here.
+    // Fees for all transactions are processed first, followed by applying
+    // transactions, and doing post-application fee processing (refunds).
+    TransactionResultMetaV2 txProcessing<>;
+
+    // Upgrades are applied after applying transactions.
+    UpgradeEntryMeta upgradesProcessing<>;
+
+    // Other misc information attached to the ledger close
+    SCPHistoryEntry scpInfo<>;
+
+    // Size of live Soroban state in bytes.
+    uint64 totalByteSizeOfLiveSorobanState;
+    // Soroban write fee per 1 KB of state.
+    int64 sorobanFeeWrite1KB;
+    // TTL and data/code keys that have been evicted at this ledger.
+    LedgerKey evictedKeys<>;
+};
+
 union LedgerCloseMeta switch (int v)
 {
 case 0:
@@ -700,5 +737,7 @@ case 1:
     LedgerCloseMetaV1 v1;
 case 2:
     LedgerCloseMetaV2 v2;
+case 3:
+    LedgerCloseMetaV3 v3;
 };
 }
