@@ -86,6 +86,15 @@ typedef PublicKey AccountID;
 
 typedef Hash ContractID;
 
+// NSAT native monetary amount: exact signed 128-bit integer, big-endian
+// wire order [hi, lo]. Single canonical definition for NativeAmount128
+// (see src/util/NativeAmount128.h; R4-WAVE-1..2).
+struct NativeAmount128
+{
+    hyper hi;
+    unsigned hyper lo;
+};
+
 struct Curve25519Secret
 {
     opaque key[32];

@@ -77,8 +77,8 @@ Result: CreateAccountResult
 */
 struct CreateAccountOp
 {
-    AccountID destination; // account to create
-    int64 startingBalance; // amount they end up with
+    AccountID destination;   // account to create
+    NativeAmount128 startingBalance; // amount they end up with (NSAT)
 };
 
 /* Payment
@@ -93,7 +93,7 @@ struct PaymentOp
 {
     MuxedAccount destination; // recipient of the payment
     Asset asset;              // what they end up with
-    int64 amount;             // amount they end up with
+    NativeAmount128 amount;   // amount they end up with (NSAT)
 };
 
 /* PathPaymentStrictReceive
@@ -1189,7 +1189,7 @@ struct SimplePaymentResult
 {
     AccountID destination;
     Asset asset;
-    int64 amount;
+    NativeAmount128 amount;
 };
 
 union PathPaymentStrictReceiveResult switch (
@@ -1512,7 +1512,7 @@ enum AccountMergeResultCode
 union AccountMergeResult switch (AccountMergeResultCode code)
 {
 case ACCOUNT_MERGE_SUCCESS:
-    int64 sourceAccountBalance; // how much got transferred from source account
+    NativeAmount128 sourceAccountBalance; // how much got transferred from source account
 case ACCOUNT_MERGE_MALFORMED:
 case ACCOUNT_MERGE_NO_ACCOUNT:
 case ACCOUNT_MERGE_IMMUTABLE_SET:
