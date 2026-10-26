@@ -64,7 +64,9 @@ enum OperationType
     LIQUIDITY_POOL_WITHDRAW = 23,
     INVOKE_HOST_FUNCTION = 24,
     EXTEND_FOOTPRINT_TTL = 25,
-    RESTORE_FOOTPRINT = 26
+    RESTORE_FOOTPRINT = 26,
+    // NSAT Shielded V1 — devnet-gated (invalid at ledger version < 1).
+    SHIELDED = 27
 };
 
 /* CreateAccount
@@ -651,6 +653,20 @@ struct RestoreFootprintOp
 };
 
 /* An operation is the lowest unit of work that a transaction does */
+// NSAT Shielded V1 (devnet-gated):
+//  bundleZip225      — canonical ZIP-225 Orchard section (anchor, actions,
+//                      proof, binding signature). Consensus verifies it via
+//                      the reviewed orchard FFI; fail-closed on any error.
+//  transparentOutput — exact s→t withdrawal credit; 0 = none. When >0,
+//                      withdrawalTarget is credited from the shielded pool.
+//  withdrawalTarget  — credit target (required iff transparentOutput>0).
+struct ShieldedOp
+{
+    opaque bundleZip225<262144>;
+    int64 transparentOutput;
+    AccountID withdrawalTarget;
+};
+
 struct Operation
 {
     // sourceAccount is the account used to run the operation
@@ -714,6 +730,8 @@ struct Operation
         ExtendFootprintTTLOp extendFootprintTTLOp;
     case RESTORE_FOOTPRINT:
         RestoreFootprintOp restoreFootprintOp;
+    case SHIELDED:
+        ShieldedOp shieldedOp;
     }
     body;
 };
