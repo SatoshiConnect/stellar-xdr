@@ -1946,6 +1946,31 @@ case RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE:
     void;
 };
 
+/******* Shielded Result ********/
+
+// NSAT Shielded V1 (devnet-gated). The op is categorically rejected on
+// ledgers with version < 1; production Mainnet stays at version 0.
+enum ShieldedResultCode
+{
+    // codes considered as "success" for the operation
+    SHIELDED_SUCCESS = 0,
+
+    // codes considered as "failure" for the operation
+    SHIELDED_MALFORMED = -1,             // invalid op body / bundle bounds
+    SHIELDED_GATE_CLOSED = -2,           // ledgerVersion < SHIELDED_V1
+    SHIELDED_VERIFY_FAILED = -3,         // halo2/signature verification failed
+    SHIELDED_NULLIFIER_DUPLICATE = -4,   // note already spent
+    SHIELDED_WITHDRAWAL_MISMATCH = -5,   // transparentOutput vs bundle delta
+    SHIELDED_INSUFFICIENT_BALANCE = -6,  // deposit: source cannot pay amount
+    SHIELDED_POOL_OVERFLOW = -7,         // withdrawal credit overflow
+    SHIELDED_VERIFIER_UNAVAILABLE = -8   // kernel FFI not loadable (fail-closed)
+};
+
+struct ShieldedResult
+{
+    ShieldedResultCode code;
+};
+
 /* High level Operation Result */
 enum OperationResultCode
 {
@@ -2018,6 +2043,8 @@ case opINNER:
         ExtendFootprintTTLResult extendFootprintTTLResult;
     case RESTORE_FOOTPRINT:
         RestoreFootprintResult restoreFootprintResult;
+    case SHIELDED:
+        ShieldedResult shieldedResult;
     }
     tr;
 case opBAD_AUTH:
