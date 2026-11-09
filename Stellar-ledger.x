@@ -65,6 +65,32 @@ enum LedgerHeaderFlags
     DISABLE_LIQUIDITY_POOL_WITHDRAWAL_FLAG = 0x4
 };
 
+// NSAT Founder Mint (protocol 31) accounting, kept in the consensus ledger
+// header so that it is identical on every node and covered by the ledger
+// hash. It is never derived from closeTime or from local wall-clock time.
+struct LedgerHeaderExtensionV2
+{
+    // Number of finalized consensus heartbeats accounted by Founder Mint
+    // since activation. A heartbeat is one finalized ledger: it increments
+    // by exactly one per applied ledger while the mint is active, and it is
+    // the sole monetary input to emission (1 NSAT per heartbeat).
+    uint64 founderMintHeartbeat;
+
+    // Founder Mint NSAT that is earned by finalized heartbeats but cannot be
+    // delivered to the destination account yet (destination account absent,
+    // or its balance cannot accept the credit). It stays on the ledger as a
+    // pending entitlement -- never dropped, never burned -- and is released
+    // automatically on the first close that can deliver it.
+    NativeAmount128 founderMintEscrow;
+
+    union switch (int v)
+    {
+    case 0:
+        void;
+    }
+    ext;
+};
+
 struct LedgerHeaderExtensionV1
 {
     uint32 flags; // LedgerHeaderFlags
@@ -73,6 +99,8 @@ struct LedgerHeaderExtensionV1
     {
     case 0:
         void;
+    case 2:
+        LedgerHeaderExtensionV2 v2;
     }
     ext;
 };
